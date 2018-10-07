@@ -3,7 +3,7 @@
 
 FROM alpine:3.6
 
-ENV NGINX_VERSION 1.12.1
+ENV NGINX_VERSION 1.14.0
 ENV NGINX_STICKY_MODULE_NG_VERSION 08a395c66e42
 ENV NGINX_UPSTREAM_DYNAMIC_SERVERS_VERSION master
 
@@ -128,8 +128,12 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& apk del .build-deps \
 	&& apk del .gettext \
 	&& mv /tmp/envsubst /usr/local/bin/ \
-	\
-	# forward request and error logs to docker log collector
+	&& (rm -rf /var/cache/apk 2> /dev/null || echo "OK") \
+	&& (rm -rf /tmp/* 2> /dev/null || echo "OK") \
+	&& (rm -rf /tmp/.* 2> /dev/null || echo "OK") \
+	&& (rm -rf /root/* 2> /dev/null || echo "OK") \
+	&& (rm -rf /root/.* 2> /dev/null || echo "OK") \
+	&& mkdir -p /var/log/nginx \
 	&& ln -sf /dev/stdout /var/log/nginx/access.log \
 	&& ln -sf /dev/stderr /var/log/nginx/error.log
 
