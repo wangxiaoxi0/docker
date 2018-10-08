@@ -1,10 +1,9 @@
 nginx + sticky
 
 #### 项目介绍
-Dockerfile      1                   0
-alpine          3.6                 3.7
-nginx   1.12.1(1.13.12/1.14.0)      1.13.7
-sticky          08a395c66e42        1.2.6
+alpine:3.8
+nginx:1.14.0
+sticky:1.2.6
 
 
 #### 运行命令
