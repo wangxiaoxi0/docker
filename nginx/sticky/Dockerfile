@@ -3,6 +3,7 @@ FROM alpine:3.8
 ENV NGINX_VERSION 1.14.0
 ENV STICKY_VERSION 1.2.6
 
+ADD nginx-upstream-check-module.tar.gz /usr/src/
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& CONFIG="\
 		--prefix=/etc/nginx \
@@ -30,6 +31,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		--with-stream_realip_module \
 		--with-compat \
     --add-module=/usr/src/nginx-sticky-module \
+		--add-module=/usr/src/nginx-upstream-check-module \
 	" \
 	&& addgroup -S nginx \
 	&& adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx nginx \
@@ -60,7 +62,10 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   && cat /usr/src/nginx-sticky-module/ngx_http_sticky_misc.c | head -n 15 \
 	&& tar -zxC /usr/src -f nginx.tar.gz \
 	&& rm -rf nginx.tar.gz \
+	&& cd /usr/src/ \
+	&& patch -p0 < /usr/src/nginx-upstream-check-module/nginx-sticky-module.patch \
 	&& cd /usr/src/nginx-$NGINX_VERSION \
+	&& patch -p1 < /usr/src/nginx-upstream-check-module/check_$NGINX_VERSION+.patch \
 	&& ./configure $CONFIG --with-debug \
 	&& make -j$(getconf _NPROCESSORS_ONLN) \
 	&& mv objs/nginx objs/nginx-debug \
@@ -79,6 +84,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 	&& (strip /usr/lib/nginx/modules/*.so || echo "no modules") \
   && (strip /usr/lib/nginx/addons/*.so  || echo "no addons") \
 	&& rm -rf /usr/src/nginx-$NGINX_VERSION \
+	&& rm -rf /sticky.zip \
 	&& apk add --no-cache --virtual .gettext gettext \
 	&& mv /usr/bin/envsubst /tmp/ \
 	\

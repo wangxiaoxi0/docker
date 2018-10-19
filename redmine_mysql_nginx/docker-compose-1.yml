@@ -1,0 +1,38 @@
+version: "3.7"
+
+volumes:
+  files_volume:
+    driver: vieux/sshfs
+    driver_opts:
+      sshcmd: root@172.16.102.71:/sagereal/redmine/data
+      allow_other: ""
+      password: 123
+  config_volume:
+    driver: vieux/sshfs
+    driver_opts:
+      sshcmd: root@172.16.102.71:/sagereal/redmine/config
+      allow_other: ""
+      password: 123
+
+services:
+    redmine:
+      image: redmine:3.3.8
+      restart: always
+      ports:
+        - 10083:3000
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /sagereal/redmine/log:/usr/src/redmine/log
+        - files_volume:/usr/src/redmine/files
+        - config_volume:/config_volume
+      environment:
+        REDMINE_DB_MYSQL: 172.16.102.71
+        REDMINE_DB_PASSWORD: password
+        REDMINE_NO_DB_MIGRATE: 1
+      command:
+        - /bin/sh
+        - -c
+        - |
+          rm -rf /usr/src/redmine/config/settings.yml
+          ln -s /config_volume/* /usr/src/redmine/config/
+          /docker-entrypoint.sh rails server -b 0.0.0.0

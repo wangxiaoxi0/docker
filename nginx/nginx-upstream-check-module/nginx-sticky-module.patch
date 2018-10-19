@@ -1,0 +1,57 @@
+--- nginx-sticky-module/ngx_http_sticky_module.c
++++ nginx-sticky-module/ngx_http_sticky_module.c
+@@ -10,11 +10,10 @@
+ 
+ #include "ngx_http_sticky_misc.h"
+ 
+-#if (NGX_UPSTREAM_CHECK_MODULE)
+-#include "ngx_http_upstream_check_handler.h"
++#if (NGX_HTTP_UPSTREAM_CHECK)
++#include "ngx_http_upstream_check_module.h"
+ #endif
+ 
+-
+ /* define a peer */
+ typedef struct {
+ 	ngx_http_upstream_rr_peer_t *rr_peer;
+@@ -298,7 +297,16 @@
+ 					ngx_log_error(NGX_LOG_NOTICE, pc->log, 0, "[sticky/get_sticky_peer] the selected peer is down and no_fallback is flagged");
+ 					return NGX_BUSY;
+ 				}
++				#if (NGX_HTTP_UPSTREAM_CHECK)
++                ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
++                               "get sticky peer, check_index: %ui",
++                               peer->check_index);
+ 
++                if (ngx_http_upstream_check_peer_down(peer->check_index)) {
++					return NGX_BUSY;
++                }
++				#endif
++
+ 				/* if it's been ignored for long enought (fail_timeout), reset timeout */
+ 				/* do this check before testing peer->fails ! :) */
+ 				if (now - peer->accessed > peer->fail_timeout) {
+@@ -314,7 +322,13 @@
+ 
+ 			/* ensure the peer is not marked as down */
+ 			if (!peer->down) {
++				#if (NGX_HTTP_UPSTREAM_CHECK)
++                ngx_log_debug1(NGX_LOG_DEBUG_HTTP, pc->log, 0,
++                               "get sticky peer, check_index: %ui",
++                               peer->check_index);
+ 
++                if (!ngx_http_upstream_check_peer_down(peer->check_index)) {
++			#endif
+ 				/* if it's not failedi, use it */
+ 				if (peer->max_fails == 0 || peer->fails < peer->max_fails) {
+ 					selected_peer = (ngx_int_t)n;
+@@ -329,6 +343,9 @@
+ 					/* mark the peer as tried */
+ 					iphp->rrp.tried[n] |= m;
+ 				}
++#if (NGX_HTTP_UPSTREAM_CHECK)
++                }
++#endif
+ 			}
+ 		}
+ 	}
