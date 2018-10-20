@@ -26,6 +26,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
 		--with-http_sub_module \
 		--with-http_gunzip_module \
 		--with-http_gzip_static_module \
+		--with-http_stub_status_module \
 		--with-threads \
 		--with-stream \
 		--with-stream_realip_module \
