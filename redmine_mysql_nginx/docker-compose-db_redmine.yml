@@ -1,0 +1,46 @@
+version: "3.7"
+
+volumes:
+  files_volume:
+    driver: vieux/sshfs
+    driver_opts:
+      sshcmd: root@192.168.3.86:/sagereal/redmine/data
+      allow_other: ""
+      password: redmine
+  config_volume:
+    driver: vieux/sshfs
+    driver_opts:
+      sshcmd: root@192.168.3.86:/sagereal/redmine/config
+      allow_other: ""
+      password: redmine
+
+services:
+    db:
+      image: mysql:5.7
+      restart: always
+      ports:
+        - 3306:3306
+      volumes:
+        - /sagereal/redmine/mysql:/var/lib/mysql
+        - /etc/localtime:/etc/localtime:ro
+      environment:
+        MYSQL_ROOT_PASSWORD: password
+        MYSQL_DATABASE: redmine
+
+    redmine:
+      image: wangxiaoxi/redmine:ubuntu16-3.3.8
+      restart: always
+      ports:
+        - 10083:3000
+      volumes:
+        - /etc/localtime:/etc/localtime:ro
+        - /sagereal/redmine/log:/usr/src/redmine/log
+        - files_volume:/usr/src/redmine/files
+        - config_volume:/config_volume
+      command:
+        - /bin/sh
+        - -c
+        - |
+          #rm -rf /usr/src/redmine/config/settings.yml
+          cp -r /config_volume/* /usr/src/redmine/config/
+          /docker-entrypoint.sh
