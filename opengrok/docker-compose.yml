@@ -1,0 +1,48 @@
+version: "3.7"
+
+services:
+    opengrok_80go:
+      image: wangxiaoxi/opengrok:1.1.75
+      restart: always
+      ports:
+        - 8000:8080
+      volumes:
+        - /home/wlj/hdd:/volume
+      environment:
+        REINDEX: 30
+      command:
+        - /bin/sh
+        - -c
+        - |
+          ln -s /volume/80go/sagereal /src/sagereal
+          ln -s /volume/80go/alps/kernel-3.18 /src/kerne-3.18
+          ln -s /volume/80go/alps/vendor /src/vendor
+          ln -s /volume/80go/alps/device /src/device
+          ln -s /volume/80go/alps/system /src/system
+          ln -s /volume/80go/alps/build /src/build
+          ln -s /volume/80go/alps/bionic /src/bionic
+          ln -s /volume/80go/alps/bootable /src/bootable
+          /scripts/start.sh
+    
+    opengrok_39o:
+      image: wangxiaoxi/opengrok:1.1.75
+      restart: always
+      ports:
+        - 3900:8080
+      volumes:
+        - /home/wlj/hdd:/volume
+      environment:
+        REINDEX: 30
+      command:
+        - /bin/sh
+        - -c
+        - |
+          ln -s /volume/39o/sagereal /src/sagereal
+          ln -s /volume/39o/alps/kernel-4.4 /src/kerne-4.4
+          ln -s /volume/39o/alps/vendor /src/vendor
+          ln -s /volume/39o/alps/device /src/device
+          ln -s /volume/39o/alps/system /src/system
+          ln -s /volume/39o/alps/build /src/build
+          ln -s /volume/39o/alps/bionic /src/bionic
+          ln -s /volume/39o/alps/bootable /src/bootable
+          /scripts/start.sh
