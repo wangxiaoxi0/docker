@@ -1,0 +1,11 @@
+version: "3.7"
+
+services:
+    hexo:
+      image: wangxiaoxi/hexo
+      ports:
+        - 80:4000
+      volumes:
+        - /home/vm/blog/_config.yml:/hexo/_config.yml:ro
+        - /home/vm/blog/_indigo_config.yml:/hexo/themes/indigo/_config.yml
+        - /home/vm/blog/md:/hexo/source/_posts
